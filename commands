@@ -1,0 +1,40 @@
+
+=============================
+Commands
+ - https://docs.ansible.com/ansible/latest/user_guide/command_line_tools.html 
+============================= 
+* ansible
+  - ansible <host-pattern> [options]
+  - allows you to define and run a single task ‘playbook’ against a set of hosts
+  
+* ansible-config
+  - ansible-config [view|dump|list] [--help] [options] [ansible.cfg]
+  - View, edit, and manage ansible configuration.
+  
+* ansible-console
+  - ansible-console [<host-pattern>] [options]
+  - REPL console for executing Ansible tasks. a REPL that allows for running ad-hoc tasks against a chosen inventory (based on dominis’ ansible-shell).
+
+* ansible-doc
+  - ansible-doc [-l|-F|-s] [options] [-t <plugin type> ] [plugin]
+  - plugin documentation tool, displays information on modules installed in Ansible libraries. It displays a terse listing of plugins and their short descriptions, provides a printout of their DOCUMENTATION strings, and it can create a short “snippet” which can be pasted into a playbook.
+
+* ansible-galaxy
+  - ansible-galaxy [delete|import|info|init|install|list|login|remove|search|setup] [--help] [options] ...
+  - Perform various Role related operations. command to manage Ansible roles in shared repositories, the default of which is Ansible Galaxy https://galaxy.ansible.com.
+
+* ansible-inventory
+  - ansible-inventory [options] [host|group]
+  - used to display or dump the configured inventory as Ansible sees it
+
+* ansible-playbook
+  - ansible-playbook [options] playbook.yml [playbook2 ...]
+  - Runs Ansible playbooks, executing the defined tasks on the targeted hosts.the tool to run Ansible playbooks, which are a configuration and multinode deployment system. 
+
+* ansible-pull
+  - ansible-pull -U <repository> [options] [<playbook.yml>]
+  - pulls playbooks from a VCS repo and executes them for the local host. is used to up a remote copy of ansible on each managed node, each set to run via cron and update playbook source via a source repository. This inverts the default push architecture of ansible into a pull architecture, which has near-limitless scaling potential.  The setup playbook can be tuned to change the cron frequency, logging locations, and parameters to ansible-pull. This is useful both for extreme scale-out as well as periodic remediation. Usage of the ‘fetch’ module to retrieve logs from ansible-pull runs would be an excellent way to gather and analyze remote logs from ansible-pull.
+
+* ansible-vault
+  - ansible-vault [create|decrypt|edit|encrypt|encrypt_string|rekey|view] [options] [vaultfile.yml]
+  - encryption/decryption utility for Ansible data files. can encrypt any structured data file used by Ansible. This can include group_vars/ or host_vars/ inventory variables, variables loaded by include_vars or vars_files, or variable files passed on the ansible-playbook command line with -e @file.yml or -e @file.json. Role variables and defaults are also included!  Because Ansible tasks, handlers, and other objects are data, these can also be encrypted with vault. If you’d like to not expose what variables you are using, you can keep an individual task file entirely encrypted.  The password used with vault currently must be the same for all files you wish to use together at the same time.
