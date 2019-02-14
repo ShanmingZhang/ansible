@@ -1,0 +1,42 @@
+OS: Ubuntu 16.04 LTS
+=============================
+
+Ansible playbooks -> plays -> tasks -> handlers
+
+push out modules -> execute modules -> remove modules
+
+hosts -> configure node machine hostnames or IP address, groups
+
+Inventory -> including dynamic and static inventories
+
+any user for remote node, and also can change su or sudo
+
+ssh
+
+
+=============================
+Ansible 2.7.7: Control Machine Install
+=============================
+sudo apt-get update
+sudo apt-get install software-properties-common
+sudo apt-add-repository --yes --update ppa:ansible/ansible
+sudo apt-get install ansible
+
+=============================
+Ansible 2.7.7: Configurations Setting
+=============================
+* configuration file : ansible.cfg
+* ansible.cfg may be configured and searched in following order:
+	•	ANSIBLE_CONFIG (environment variable if set)
+	•	ansible.cfg (in the current directory)
+	•	~/.ansible.cfg (in the home directory)
+	•	/etc/ansible/ansible.cfg
+* if the configuration file ansible.cfg is not in /etc/ansible/, you can make directory /etc/ansible/ and create a ansible.cfg file as the example file [https://raw.githubusercontent.com/ansible/ansible/devel/examples/ansible.cfg]
+
+* for details about ansible.cfg, see [https://docs.ansible.com/ansible/latest/reference_appendices/config.html#ansible-configuration-settings]
+ 
+
+
+
+
+
