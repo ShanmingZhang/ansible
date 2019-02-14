@@ -36,6 +36,83 @@ Ansible 2.7.7: Configurations Setting
 * for details about ansible.cfg, see [https://docs.ansible.com/ansible/latest/reference_appendices/config.html#ansible-configuration-settings]
  
 
+=============================
+How Ansible communicates with remote machines over SSH.
+=============================
+*ControlPersist, one of Ansible performance features, try to use ssh for remote communication when possible. 
+  - native OpenSSH
+  - high-quality Python implementation of OpenSSH called ‘paramiko’
+*Support SFTP and SCP modes
+*Ansible by default assumes you are using SSH keys. 
+  - the option ‘--ask-pass’  
+  - the option ‘--ask-become-pass’ when sudo require a password
+
+=============================
+Basic commands
+============================= 
+1. Edit or create file: ‘/etc/ansible/hosts’ that used to configure node machines/hosts IP addresses and groups.
+	#####
+	[node_machines]
+	192.168.56.103
+	192.168.56.104
+	192.168.56.105
+	server.example.org
+	#####
+The control machine’s public SSH key will be located in authorized_keys of these node machines.
+
+2. Using SSH keys for authentication, set up SSH agent to avoid retyping passwords
+	#####
+	$ ssh-agent bash
+	$ ssh-add ~/.ssh/id_rsa
+	#####
+
+3. ping all node machines:
+   - connect to node machines using control machine current user name,
+	####
+	$ ansible all -m ping
+	####
+   - connect to node machines using the remote use name with ‘-u’ parameter
+	####
+	$ ansible all -m ping -u ubean
+	####
+   - connect to node machines using the remote use name ‘ubean’ and sudoing to root.
+	####
+	$ ansible all -m ping -u ubean --sudo (for old version)
+     or
+     $ ansible all -m ping -u bruce -b (for new version)
+	####
+   - connect to node machines using the remote use name ‘ubean’ and studding to apple.
+	####
+	$ ansible all -m ping -u ubean --sudo --sudo-user apple (for old version)
+	or
+	$ ansible all -m ping -u ubean -b --become-user apple (for new version)
+	####
+
+4. run a live command in every node machines:
+	##
+	$ ansible all -a “/bin/echo hello”
+	##
+
+5. can specify the local server by using “localhost” or “127.0.0.1” for the server name.
+	##
+	$ ansible localhost -m ping -e 'ansible_python_interpreter="/usr/bin/env python"'
+	##
+
+or adding this to your inventory file:
+	##
+	localhost ansible_connection=local ansible_python_interpreter="/usr/bin/env python"
+	##
+6. configure host key checking for reinstalled host or reholding different key in ‘know_hosts’ that will result in an error message until corrected.
+By editing /etc/ansible/ansible.cfg or ~/.ansible.cfg can to avoid the behavior.
+	##
+	[defaults]
+	host_key_checking = False
+	##
+
+7. ansible log some information in node machines’ syslog, unless a task or play is marked with a “no_log: True” attribute. 
+
+8. To enable basic logging on the control machine see Configuring Ansible document and set the ‘log_path’ configuration file setting
+
 
 
 
