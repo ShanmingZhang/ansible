@@ -1,0 +1,90 @@
+
+=============================
+Ad-hoc commands
+ - https://docs.ansible.com/ansible/latest/user_guide/intro_adhoc.html 
+ - What’s an ad-hoc command?
+   An ad-hoc command is something that you might type in to do something really quick, but don’t want to save for later.
+============================= 
+* Ad-hoc commands' advantages:
+  - understand the basics of what Ansible can do prior to learning the playbooks language
+  - used to do quick things that you might not necessarily want to write a full playbook for.
+  - you could execute a quick one-liner in Ansible without writing a playbook, although the true power of Ansible lies in playbooks. 
+  - also select what Ansible “module” you want to run with -m for modules
+    take a -m for module name, but the default module name is ‘command’
+
+
+* Parallelism and Shell Commands
+  - run the command on all servers in a group 'atlanta', in 10 parallel forks:
+    ## The -f 10 in the above specifies the usage of 10 simultaneous processes to use. The default is actually 5
+    $ ansible atlanta -a "/sbin/reboot" -f 10
+  
+
+* File Transfer [ modules: copy, file]
+  - Ansible can SCP lots of files to multiple machines in parallel.
+    ## atlanta:   group or host name,  copy:  module name
+    $ ansible atlanta -m copy -a "src=/etc/hosts dest=/tmp/hosts" 
+
+  - The file module allows changing ownership and permissions on files. (file exists or not? to create file defaultly?)
+    $ ansible webservers -m file -a "dest=/srv/foo/a.txt mode=600"
+    $ ansible webservers -m file -a "dest=/srv/foo/b.txt mode=600 owner=mdehaan group=mdehaan"
+
+  - The file module can also create directories, similar to mkdir -p:
+    $ ansible webservers -m file -a "dest=/path/to/c mode=755 owner=mdehaan group=mdehaan state=directory"
+    
+  - The file module can also delete directories (recursively) and delete files:
+    $ ansible webservers -m file -a "dest=/path/to/c state=absent"
+
+* Managing Packages [modules: yum, apt]
+  - Ensure a package is installed, but don’t update it:
+    $ ansible webservers -m yum -a "name=acme state=present"
+    
+  - Ensure a package is installed to a specific version:
+    $ ansible webservers -m yum -a "name=acme-1.5 state=present"
+    
+  - Ensure a package is at the latest version:
+    $ ansible webservers -m yum -a "name=acme state=latest"
+    
+  - Ensure a package is not installed:
+    $ ansible webservers -m yum -a "name=acme state=absent"
+
+* Users and Groups [modules: user]
+  - Creation and manipulation of existing user accounts
+    $ ansible all -m user -a "name=foo password=<crypted password here>"
+    
+  - Removal of user accounts that may exist:
+    $ ansible all -m user -a "name=foo state=absent"
+    
+  - How to manipulate groups and group membership.
+
+* Deploying From Source Control [ modules: git]
+  - Deploy your webapp straight from git:
+    $ ansible webservers -m git -a "repo=https://foo.example.org/repo.git dest=/srv/myapp version=HEAD"
+
+* Managing Services [ modules: service]
+  - Ensure a service is started on all webservers:
+    $ ansible webservers -m service -a "name=httpd state=started"
+    
+  - Restart a service on all webservers:    # web servers:  may be one host or one group including many hosts
+    $ ansible webservers -m service -a "name=httpd state=restarted"
+    
+  - Ensure a service is stopped:
+    $ ansible webservers -m service -a "name=httpd state=stopped"
+
+* Time Limited Background Operations [modules: -B(background) -p(Poll mode)]
+  - Long running operations can be run in the background, and it is possible to check their status later.
+    For example, to execute long_running_operation asynchronously in the background, with a timeout of 3600 seconds (-B), and without polling (-P):
+    $ ansible all -B 3600 -P 0 -a "/usr/bin/long_running_operation --do-stuff"
+    
+  — If you do decide you want to check on the job status later, you can use the async_status module, passing it the job id that was returned when you ran the original job in the background:
+    $ ansible web1.example.com -m async_status -a "jid=488359678239.2844"
+    
+  — Polling is built-in and looks like this: ******
+    ## Poll mode is smart so all jobs will be started before polling will begin on any machine.
+    ## “run for 30 minutes max (-B 30*60=1800), poll for status (-P) every 60 seconds”.
+    $ ansible all -B 1800 -P 60 -a "/usr/bin/long_running_operation --do-stuff"
+
+* Gathering Facts
+  — Facts are described in the playbooks section and represent discovered variables about a system.
+  — Can see all facts via:
+    $ ansible all -m setup
+
