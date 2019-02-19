@@ -1,0 +1,209 @@
+
+
+=============================
+Ansible’s inventory
+
+
+* Static ansible inventory
+  - Defaults to being saved in the location /etc/ansible/hosts.
+  - Also can specify a different inventory file using -i <file_path> option on the command line.
+  - Also can use multiple inventory files at the same time
+  - Format of inventory: YAML, ini, etc. depending on the inventory plugins you have.
+
+* Dynamic ansible inventory
+  - Also pull inventory from dynamic or cloud sources.
+
+=============================
+
+* Hosts and Groups
+  - INI-version inventory file (one of ansible’s defaults)
+   ——
+    mail.example.com  #-> a host (ansible node machine)
+
+    [webservers]     #-> group name
+    foo.example.com  #-> host(name) belonged of group without ssh port
+    bar.example.com:port  #-> attached with ssh ports that
+
+    [dbservers]      #-> group name
+    one.example.com  #-> host(name) belonged of group
+    two.example.com
+    three.example.com
+  ——
+
+  - YAML-version inventory file (one of ansible’s defaults)
+  ——
+  all:
+    hosts:                  #-> ansible node machine
+      mail.example.com:
+    children:               #-> ansible node machine group
+      webservers:
+        hosts:
+          foo.example.com:
+          bar.example.com:
+      dbservers:
+        hosts:
+          one.example.com:
+          two.example.com:
+          three.example.com:
+  ——
+
+ - Static IP contacted with aliases
+    ## jumper: host alias  contact 192.0.2.50 on port 5555
+    —— Ini-version
+      jumper ansible_port=5555 ansible_host=192.0.2.50
+    ——
+
+    —— YAML-version
+      hosts:
+        jumper:
+          ansible_port: 5555
+          ansible_host: 192.0.2.50
+    ——
+
+  - Patterns of host list
+    ##numeric patterns
+    —— 
+    [webservers]
+    www[01:50].example.com   #-> list 50 hosts that are from [www01 to www50].example.com
+    ——
+    ##alphabetic patterns
+    —— 
+    [databases]
+    db-[a:f].example.com   #-> list hosts from [db-a to db-f].example.com
+    ——
+
+  - Select connection type and user for host
+    ——
+    [targets]
+
+    localhost              ansible_connection=local
+    other1.example.com     ansible_connection=ssh        ansible_user=mpdehaan
+    other2.example.com     ansible_connection=ssh        ansible_user=mdehaan
+    ——
+
+* Host  Variables
+    ——
+    [atlanta]
+    host1 http_port=80 maxRequestsPerChild=808
+    host2 http_port=303 maxRequestsPerChild=909
+   ——
+
+* Group Variables
+  ——
+  [atlanta]
+  host1
+  host2
+
+  [atlanta:vars]
+  ntp_server=ntp.atlanta.example.com
+  proxy=proxy.atlanta.example.com
+  ——
+
+* Groups of Groups 
+  - make groups of groups using the :children suffix in INI or the children: entry in YAML.
+  - can apply variables using :vars or vars:
+  ——
+  [atlanta]
+  host1
+  host2        #-> host2 in group atlanta and raleigh
+
+  [raleigh]
+  host2        #-> host2 in group atlanta and raleigh
+  host3
+
+  [southeast:children]  #-> groups of groups
+  atlanta
+  raleigh
+
+  [southeast:vars]
+  some_server=foo.southeast.example.com
+  halon_system_timeout=30
+  self_destruct_countdown=60
+  escape_pods=2
+
+  [usa:children]   #-> groups of groups
+  southeast
+  northeast
+  southwest
+  northwest
+  ——
+
+  ——
+  all:
+    children:
+      usa:
+        children:
+          southeast:
+            children:
+              atlanta:
+                hosts:
+                  host1:
+                  host2:
+              raleigh:
+                hosts:
+                  host2:
+                  host3:
+            vars:
+              some_server: foo.southeast.example.com
+              halon_system_timeout: 30
+              self_destruct_countdown: 60
+              escape_pods: 2
+          northeast:
+          northwest:
+          southwest:
+  ——
+
+	•	Any host that is member of a child group is automatically a member of the parent group.
+	•	A child group’s variables will have higher precedence (override) a parent group’s variables.
+	•	Groups can have multiple parents and children, but not circular relationships.
+	•	Hosts can also be in multiple groups, but there will only be one instance of a host, merging the data from the multiple groups.
+
+* Default groups
+  - Two default groups: all , ungrouped
+  - all contains every host
+  - ungrouped contains all hosts that don’t have another group aside from all.
+  - Every host will always belong to at least 2 groups
+
+* Splitting out host and group specific data
+  - Not store variables in the main inventory file.
+  - Host and group variables can be stored in individual files relative to the inventory file.
+  - These variable files are in YAML format, and valid file extensions include ‘.yml’, ‘.yaml’ ‘.json’, or no file extension
+  - the files structure:
+    # assuming the inventory file path is:
+    /etc/ansible/hosts
+    # define a host whose name is ‘foosball’, and in group ‘raleigh’ and ‘webservers’, then the variables in YAML files will be made available to the host at the following locations:
+    /etc/ansible/group_vars/raleigh.yaml  # can optionally end in ‘.yml’,’.yaml’,or ‘.json’
+    /etc/ansible/group_vars/webservers.yml
+    /etc/ansible/host_vars/foosball.json
+
+   - For example, the data in the group file ‘/etc/ansible/group_vars/raleigh’ fro ‘raleigh’ group might look like:
+    ## hosts grouped by ‘raleigh’  there are some hosts in group ‘raleigh’
+     ---
+	   ntp_server: acme.example.org
+	   database_server: storage.example.org
+    ##
+   - Another use case to create directories named after your groups or hosts, Ansible will read all the files in these directories. 
+    ## All hosts that are in the ‘raleigh’ group will have the variables defined in these files available to them.
+    /etc/ansible/group_vars/raleigh/db_settings
+    /etc/ansible/group_vars/raleigh/cluster_settings
+    ## 
+    ## advantages:
+    keep your variables organized when a single file starts to be too big
+      when you want to use Ansible Vault on a part of a group’s variables.
+
+Tip: The group_vars/ and host_vars/ directories can exist in the playbook directory OR the inventory directory. If both paths exist, variables in the playbook directory will override variables set in the inventory directory.
+
+* How Variables Are Merged
+  The order/precedence is (from lowest to highest):
+	•	all group (because it is the ‘parent’ of all other groups)
+	•	parent group
+	•	child group
+	•	host
+
+*Non-SSH connection types
+- Ansible executes playbooks over SSH but it is not limited to this connection type. 
+- With the host specific parameter ansible_connection=<connector>, the connection type can be changed. 
+- The following non-SSH based connectors are available:
+
+
+
