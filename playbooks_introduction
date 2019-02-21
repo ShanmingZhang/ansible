@@ -1,7 +1,6 @@
 
-
 =============================
-Ansible’s playbooks
+Ansible’s playbooks: Introduction
 
 * An ansible’s configuration, deployment, and orchestration language.
   - the relationship is like follows:
@@ -17,3 +16,150 @@ Ansible’s playbooks
 * Can organize playbooks in multiple ways.
 
 =============================
+
+* About playbooks
+  - different from ad-hoc task execution mode (Ad-Hoc Commands)
+  - the basis for a really simple configuration management, multi-machine deployment system.
+  - suited to deploying complex applications
+  - declare configurations and launch these tasks synchronously or asynchronously.
+
+* Playbook language
+  - expressed in YAML format and have a minimum of syntax
+  - every playbook is composed of one or more ‘plays’ in a list.
+     +: a playbook = play#1 + play#2 …. + play#n
+  - play:
+     +: the goal of a play is to map a group of hosts and tasks
+     +: at basic level, a task can be considered as a call to an ansible module.
+  - playbook of multiple ‘plays’
+     +: is possible to orchestrate multi-machine deployments, on different hosts and groups
+
+* Playbook language example
+
+-example of only one play in a playbook
+###
+---
+- hosts: webservers
+  vars:
+    http_port: 80
+    max_clients: 200
+  remote_user: root
+  tasks:
+  - name: ensure apache is at the latest version
+    yum:
+      name: httpd
+      state: latest
+  - name: write the apache config file
+    template:
+      src: /srv/httpd.j2
+      dest: /etc/httpd.conf
+    notify:
+    - restart apache
+  - name: ensure apache is running
+    service:
+      name: httpd
+      state: started
+  handlers:
+    - name: restart apache
+      service:
+        name: httpd
+        state: restarted
+###
+-example of two plays in a playbook
+###
+
+---
+- hosts: webservers
+  remote_user: root
+
+  tasks:
+  - name: ensure apache is at the latest version
+    yum:
+      name: httpd
+      state: latest
+  - name: write the apache config file
+    template:
+      src: /srv/httpd.j2
+      dest: /etc/httpd.conf
+
+- hosts: databases
+  remote_user: root
+
+  tasks:
+  - name: ensure postgresql is at the latest version
+    yum:
+      name: postgresql
+      state: latest
+  - name: ensure that postgresql is started
+    service:
+      name: postgresql
+      state: started
+
+###
+- Plays, like tasks, run in the order specified in the playbook: top to bottom.
+
+* Playbook language features
+   - Hosts and Users [key words: hosts, remote_user, become, become_user, become_method, order]
+     +: for each play in a playbook, we can choose which machines in our infrastructure to target and what remote user to complete the tasks
+     +: hosts: a list of one or more groups or host patterns, separated by colons.
+     +: remote_user: the name of user account,  can also be defined per play and task;
+     +: example:
+     
+	###   remote_user for a play
+	---
+	- hosts: webservers
+       remote_user: root
+ 	###
+
+	### remote_user for a play and each task
+         ---
+	- hosts: webservers
+	  remote_user: root
+	  tasks:
+		- name: test connection
+	  	  ping:
+	  	  remote_user: yourname
+         ###
+	### allow another user is available to run
+	---
+	- hosts: webservers
+	　remote_user: yourname
+　　　　become: yes
+         ###
+	### also allow another user is available to run a specified task
+	---
+	- hosts: webservers
+	  remote_user: yourname
+	  tasks:
+		- service:
+			name: nginx
+			state: started
+		become: yes
+		become_method: sudo
+         ###
+
+	### firstly login as you, and then become a specified different user, then root.
+	---
+	- hosts: webservers
+	  remote_user: yourname
+       become: yes
+       become_user: postgres
+         ###
+
+	### also can specify a privilege escalation method like su or sudo
+	---
+	- hosts: webservers
+	  remote_user: yourname
+       become: yes
+       become_user: postgres
+       become_method: su
+  ###
+    +: --ask-become-pass:  can specify a password to sudu, run ansible-playbook with --ask-become-pass
+    +: order:  can also control the order in which hosts are run. supplied by the inventory
+	###
+		- hosts: all
+		  order: sorted     #-> possible values: inventory, reverse_inventory, sorted, reverse_sorted, shuffle
+		  gather_facts: False
+		  tasks:
+			- debug:
+			    var: inventory_hostname
+	###
