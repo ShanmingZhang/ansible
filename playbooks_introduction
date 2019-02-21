@@ -107,24 +107,24 @@ Ansible’s playbooks: Introduction
 	###   remote_user for a play
 	---
 	- hosts: webservers
-       remote_user: root
+          remote_user: root
  	###
 
 	### remote_user for a play and each task
-         ---
+        ---
 	- hosts: webservers
 	  remote_user: root
 	  tasks:
 		- name: test connection
 	  	  ping:
 	  	  remote_user: yourname
-         ###
+        ###
 	### allow another user is available to run
 	---
 	- hosts: webservers
 	　remote_user: yourname
-　　　　become: yes
-         ###
+　　　　   become: yes
+        ###
 	### also allow another user is available to run a specified task
 	---
 	- hosts: webservers
@@ -135,24 +135,24 @@ Ansible’s playbooks: Introduction
 			state: started
 		become: yes
 		become_method: sudo
-         ###
+        ###
 
 	### firstly login as you, and then become a specified different user, then root.
 	---
 	- hosts: webservers
 	  remote_user: yourname
-       become: yes
-       become_user: postgres
-         ###
+          become: yes
+          become_user: postgres
+        ###
 
 	### also can specify a privilege escalation method like su or sudo
 	---
 	- hosts: webservers
 	  remote_user: yourname
-       become: yes
-       become_user: postgres
-       become_method: su
-  ###
+          become: yes
+          become_user: postgres
+          become_method: su
+  	###
     +: --ask-become-pass:  can specify a password to sudu, run ansible-playbook with --ask-become-pass
     +: order:  can also control the order in which hosts are run. supplied by the inventory
 	###
@@ -162,4 +162,57 @@ Ansible’s playbooks: Introduction
 		  tasks:
 			- debug:
 			    var: inventory_hostname
+	###
+
+   - Task list [key words: tasks, name, template {src, dest}, copy, command, shell, ignore_errors, service {name, state}]
+     +: tasks are executed in order, one at a time
+     +: within a play, all hosts are going to get the same task directives.
+     +: the playbook runs from top to bottom, hosts with failed tasks are taken out of the rotation for the entire playbook. If things fail, simply correct the playbook file and rerun.
+     +: the goal of each task is to execute a ansible module, with very specific arguments.
+     +: variables can be used in arguments to modules.
+     +: every task have a name, which is included in the output from running the playbook, and human readable output. can be used to provide good descriptions of each task step.
+     +: Task format:
+          #-> action: module options (old version format)
+          #-> module: options (recommended format)
+     +: examples:
+	### service module
+	   tasks:
+	  - name: make sure apache is running
+	    service:
+	      name: httpd
+	      state: started
+	###
+
+	### command modules
+	tasks:
+	  - name: enable selinux
+	    command: /sbin/setenforce 1
+	###
+
+	### shell modules
+	tasks:
+	  - name: run this command and ignore the result
+	    shell: /usr/bin/somecommand || /bin/true
+	###
+
+	### shell modules
+	tasks:
+	  - name: run this command and ignore the result
+	    shell: /usr/bin/somecommand
+	    ignore_errors: True
+	###
+
+	### If the action line is getting too long for comfort you can break it on a space and indent any continuation lines:
+	tasks:
+	  - name: Copy ansible inventory file to client
+	    copy: src=/etc/ansible/hosts dest=/etc/ansible/hosts
+		    owner=root group=root mode=0644
+	###
+
+	### Variables can be used in action lines. Suppose you defined a variable called vhost in the vars section, you could do this:
+	tasks:
+	  - name: create a virtual host file for {{ vhost }}
+	    template:
+	      src: somefile.j2
+	      dest: /etc/httpd/conf.d/{{ vhost }}
 	###
