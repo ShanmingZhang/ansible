@@ -1,0 +1,19 @@
+
+
+=============================
+Ansible’s playbooks
+
+* An ansible’s configuration, deployment, and orchestration language.
+  - the relationship is like follows:
+     - ansible modules are the tools
+     - ansible playbooks are instruction manuals
+     - ansible host inventory are raw material
+
+* Describe a policy you want your remote systems to enforce, or a set of steps in a general IT process.
+  - basic level: used to manage configurations of and deployments to remote machines
+  - more advanced level: updates, delegate actions to other hosts, interacting with monitoring servers and load balancers.
+
+* Designed to be human-readable and are developed in a basic text language.
+* Can organize playbooks in multiple ways.
+
+=============================
