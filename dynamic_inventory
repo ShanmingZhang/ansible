@@ -1,0 +1,26 @@
+
+=============================
+Ansible’s inventory [2]: Dynamic ansible inventory
+
+
+* Static ansible inventory
+  - Defaults to being saved in the location /etc/ansible/hosts.
+  - Also can specify a different inventory file using -i <file_path> option on the command line.
+  - Also can use multiple inventory files at the same time
+  - Format of inventory: YAML, ini, etc. depending on the inventory plugins you have.
+
+* Dynamic ansible inventory  
+  - Also pull inventory from dynamic or cloud sources.
+  - dynamic external inventory system supports two ways to connect with external inventory:
+    Inventory Plugins
+    Inventory scripts <https://github.com/ansible/ansible/tree/devel/contrib/inventory>.
+=============================
+
+* Inventory plugins
+   - plugins over scripts for dynamic inventory
+   - write your own plugin to connect to additional dynamic inventory sources.
+   
+* Ansible Tower 
+   - a GUI for handling dynamic inventory
+   - provides web and REST access to the results
+   - offers a graphical inventory editor. 
