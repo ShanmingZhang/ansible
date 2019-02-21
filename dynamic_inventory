@@ -1,6 +1,5 @@
-
 =============================
-Ansible’s inventory [2]: Dynamic ansible inventory
+Ansible’s inventory [2]: Dynamic inventory
 
 
 * Static ansible inventory
@@ -14,6 +13,10 @@ Ansible’s inventory [2]: Dynamic ansible inventory
   - dynamic external inventory system supports two ways to connect with external inventory:
     Inventory Plugins
     Inventory scripts <https://github.com/ansible/ansible/tree/devel/contrib/inventory>.
+
+* Hybrid inventory
+  - It is possible to mix both dynamic and statically inventory sources in the same ansible run.
+
 =============================
 
 * Inventory plugins
@@ -23,4 +26,26 @@ Ansible’s inventory [2]: Dynamic ansible inventory
 * Ansible Tower 
    - a GUI for handling dynamic inventory
    - provides web and REST access to the results
-   - offers a graphical inventory editor. 
+   - offers a graphical inventory editor.
+ 
+=============================
+Examples: Inventory Script Cobbler
+   - Cobbler is a linux installation server.
+   - https://cobbler.github.io
+=============================
+
+=============================
+Examples: Inventory Script AWS EC2
+   - Amazon Web Services EC2
+   - EC2 external inventory script
+=============================
+
+=============================
+Examples: Inventory Script OpenStack
+  - OpenStack-based cloud
+  - openstack_inventory.py dynamic inventory
+=============================
+
+
+* Static groups of dynamic groups
+  - define groups of groups in the static inventory file, the child groups must also be defined in the station inventory file. or will return an error.
