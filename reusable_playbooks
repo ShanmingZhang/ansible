@@ -1,0 +1,15 @@
+=============================
+Ansible’s playbooks: Creating Reusable Playbooks
+
+* Reusable playbooks
+   - ansible support reuse files and start to organize things
+   - there are three ways to support the reuse of playbook
+      +:  includes
+      +:  imports
+      +:  roles
+  - includes and imports allow users to break up large playbooks into smaller files 
+      +:  these smaller files can be used across multiple parent playbooks and multiple times within the same playbook.
+  - roles allow more than just (not only) tasks to be packaged together and include variables, handlers, or even modules and other plugins.
+  - roles can also be uploaded and shared via ansible galaxy. modules and other plugins.
+
+=============================
