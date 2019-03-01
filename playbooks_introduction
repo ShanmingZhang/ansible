@@ -216,3 +216,71 @@ Ansible’s playbooks: Introduction
 	      src: somefile.j2
 	      dest: /etc/httpd/conf.d/{{ vhost }}
 	###
+
+
+   - Handlers: Running Operations On Change
+     +: Playbooks recognize the change on remote system and have a basic event system that can be used to respond to change.
+     +: The ‘notify’ actions about handlers are triggered at the end of each block of tasks in a play.
+     +: only be triggered once even if notified by multiple different tasks. 
+        For example, the apache need to be restarted because multiple tasks have changed its config file, 
+        but, for the ansible’s handler, apache will only be bounced once to avoid unnecessary restarts.
+        ### handlers of a task defined in  ‘notify’ section
+	- name: template configuration file
+  	  template:
+           src: template.j2
+           dest: /etc/foo.conf
+          notify:
+           - restart memcached
+           - restart apache
+       ###
+     +: Handlers are lists of tasks, not really any different from regular tasks
+     +: Handlers are referenced by a globally unique name
+     +: Handlers are notified by notifiers. If nothing notifies a handler, it will not run.
+     +: Handlers will be performed only once, after all of tasks complete in a particular play.
+        ### another handler model? no notify.
+        handlers:
+                - name: restart memcached
+                  service:
+        	          name: memcached
+        	          state: restarted
+    	        - name: restart apache
+      	          service:
+        	        name: apache
+        	        state: restarted
+        ###
+     +: Handlers can also “listen” to generic topics, and tasks can notify those topics, (as ansible 2.2)
+        ###  make it much easier to trigger multiple handlers.
+        ###  decouple handlers from their names, making it easier to share handlers among playbooks and roles
+        handlers:
+                - name: restart memcached
+                  service:
+                    name: memcached
+                    state: restarted
+                    listen: "restart web services"
+                - name: restart apache
+                  service:
+                    name: apache
+                    state:restarted
+                    listen: "restart web services"
+
+        tasks:
+                - name: restart everything
+                  command: echo "this task will restart the web services"
+                  notify: "restart web services"
+        ###
+
+     +: Handlers notified within pre_tasks, tasks, and post_tasks sections are automatically flushed in the end of section where they were notified;
+     +: Handlers notified within roles section are automatically flushed in the end of tasks section, but before any tasks handlers.
+	For example: If you ever want to flush all the handler commands immediately you can do this:
+	### any handlers would be processed early when the meta statement was reached.
+	tasks:
+	   - shell: some tasks go here
+	   - meta: flush_handlers
+	   - shell: some other tasks
+	### This is a bit of a niche case but can come in handy from time to time.
+
+* Executing A Playbook
+  how do you run a playbook? It’s simple. Let’s run a playbook using a parallelism level of 10:
+  ###
+  ansible-playbook playbook.yml -f 10
+  ###
