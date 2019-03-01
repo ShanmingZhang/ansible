@@ -284,3 +284,10 @@ Ansible’s playbooks: Introduction
   ###
   ansible-playbook playbook.yml -f 10
   ###
+
+* Check the syntax of a playbook, use ansible-playbook with the --syntax-check flag
+* See detailed output from successful modules with the —verbose flag
+* To see what hosts would be affected by a playbook before you run it, you can do this:
+  ###
+  ansible-playbook playbook.yml --list-hosts
+  ###
