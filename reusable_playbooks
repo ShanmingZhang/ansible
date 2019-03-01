@@ -13,3 +13,25 @@ Ansible’s playbooks: Creating Reusable Playbooks
   - roles can also be uploaded and shared via ansible galaxy. modules and other plugins.
 
 =============================
+
+* Dynamic and static reusable
+   - ansible has two modes of operation for reusable content: dynamic and static.
+   - use any import* task (import_playbook, import_tasks, etc.) it will be static.
+   - use any include* task (include_tasks, include_role, etc.), it will be dynamic.
+
+* Differences between static and dynamic
+   - ansible pre-processes all static imports during playbook parsing time.
+   - dynamic includes are processed during runtime at the point in which that task is encountered.
+   - when ansible task options like (tags) and conditional statements (when:)
+      +:  for static imports, the parent task options will be copied to all child tasks contained within the import.
+      +:  for dynamic includes, the task options will only apply to the dynamic task as it is evaluated, and will not be copied to child tasks.
+
+* Tradeoffs and pitfalls between includes and imports
+   - Using include* does have some limitations when compared to import* statements:
+      +:  Tags which only exist inside a dynamic include will not show up in --list-tags output.
+      +:  Tasks which only exist inside a dynamic include will not show up in --list-tasks output.
+      +:  You cannot use notify to trigger a handler name which comes from inside a dynamic include (see note below).
+      +:  You cannot use --start-at-task to begin execution at a task inside a dynamic include.
+   - Using import* can also have some limitations when compared to dynamic includes:
+      +:  As noted above, loops cannot be used with imports at all.
+      +:  When using variables for the target file or role name, variables from inventory sources (host/group vars, etc.) cannot be used.
