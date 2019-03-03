@@ -27,6 +27,8 @@ Ansible’s playbooks: Creating Reusable Playbooks
       +:  for dynamic includes, the task options will only apply to the dynamic task as it is evaluated, and will not be copied to child tasks.
 
 * Tradeoffs and pitfalls between includes and imports
+   - The primary advantage of using include* statements is looping. 
+      +:  When a loop is used with an include, the included tasks or role will be executed once for each item in the loop.
    - Using include* does have some limitations when compared to import* statements:
       +:  Tags which only exist inside a dynamic include will not show up in --list-tags output.
       +:  Tasks which only exist inside a dynamic include will not show up in --list-tasks output.
