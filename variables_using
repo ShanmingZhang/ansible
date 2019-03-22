@@ -1,5 +1,5 @@
 =============================
-Ansible’s playbooks: Using Variables
+Ansible’s playbooks: About using Variables[2]
  Ansible uses variables to help deal with differences between node machine systems and control machine system.
 
 * defining the variables
