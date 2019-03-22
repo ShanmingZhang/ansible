@@ -8,22 +8,61 @@ Ansible’s playbooks: Using Variables
    - defining variables in a playbook
    - defining variables in included files and roles
    - defining variables in files
-* using variables
-   - registering variables
-   - using variables with Jinja2
-        +: transforming variables with Jinja2 filters
-   - using advanced variable syntax
-   - variables discovered from system: Facts
-        +: disabling facts
-        +: local facts(facts.d)
-        +: ansible version
-        +: caching Facts
-   - accessing variable data
-        +: accessing complex variable data
-        +: accessing information about other hosts with magic variables
-   - passing variables on the command line
-   - variable precedence: Where should I put a variable?
-        +: scoping variables
-        +: examples of where to set a variable
-* hey wait, a YAML gotcha
 =============================
+
+* creating valid variable names
+  - variables always start with a letter.
+  - variable name should be letter, numbers and underscores
+     +: such as foo_port, foo5  -> right
+     +: foo-port, foo port and foo.port, 12 -> wrong, not valid 
+  - create variables with YAML dictionaries which map keys to values
+    ###
+     foo:
+       field1: one
+       field2: two
+    ###
+    we can reference a specific field using two approaches as follows:
+     foo['field1']  ->  preferred one
+      or
+     foo.field1     ->  that can cause problems because it collide with attributes and methods of python dictionaries
+    try to should use bracket notation instead of dot notation
+
+* defining variables in inventory
+  - The Working with Inventory page has details on setting Host Variables and Group Variables in inventory
+     +: https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#host-variables
+     +: https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#group-variables
+
+* defining variables in a playbook
+  - using 'vars' key word to define the variables. 
+    ###Example
+     - hosts: webservers
+       vars:
+         http_port: 80
+    ###
+
+* defining variables in included files and roles
+  - variables can also be included in the playbook via include files.
+    https://docs.ansible.com/ansible/latest/user_guide/playbooks_reuse_roles.html#playbooks-reuse-roles
+
+* defining variables in files
+  - keep certain information in different files, away from the main playbook.
+  - using an external variables file, or files.
+     ###
+     ---
+     - hosts: all
+        remote_user: root
+        vars:
+          favcolor: blue
+        vars_files:
+          - /vars/external_vars.yml
+        tasks:
+     - name: this is just a placeholder
+          command: /bin/echo foo
+          ###
+  - each variables file is a simple YAML dictionary
+     ###
+     ---
+     # in the above example, this would be vars/external_vars.yml
+     somevar: somevalue
+     password: magic
+     ###
